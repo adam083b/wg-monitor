@@ -1,0 +1,2 @@
+# wg-monitor
+Wireguard monitor
