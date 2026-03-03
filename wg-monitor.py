@@ -50,7 +50,7 @@ def check_wireguard():
         public_key = fields[0]
         endpoint = fields[2]
         allowed_ips = fields[3]
-        latest_handshake = fields[4]
+        latest_handshake = int(fields[4])
         rx = int(fields[5])
 
         if not any(ip in allowed_ips for ip in WATCHED_IPS):
