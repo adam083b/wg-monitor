@@ -30,6 +30,17 @@ def send_mail(subject, body):
         logging.error("Failed to send email: %s", str(e))
         raise
 
+def ping_host(ip):
+    try:
+        result = subprocess.run(
+            ["ping", "-c", "1", "-W", "1", ip],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL
+        )
+        return result.returncode == 0
+    except Exception:
+        return False
+
 def check_wireguard():
     global _previous_state
     
@@ -72,11 +83,15 @@ def check_wireguard():
             last_packet = now
         
         is_online = (last_packet is not None and (now - last_packet) <= ONLINE_THRESHOLD)
+
+        if not is_online and previous["online"]:
+            peer_ip = allowed_ips.split("/")[0]
+            
+            if ping_host(peer_ip):
+                last_packet = now
+                is_online = True
         
-        if (
-            is_online and
-            not previous["online"]
-        ):
+        if is_online and not previous["online"]:
             log_msg = f"Wireguard device connected: {allowed_ips}"
             logging.info(log_msg)
             
